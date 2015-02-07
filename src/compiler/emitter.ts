@@ -3850,6 +3850,12 @@ module ts {
                     if (node.importClause.name && resolver.isReferencedImport(node.importClause)) {
                         return true;
                     }
+                    if (node.importClause.namedBindings) {
+                        if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport
+                            && resolver.isReferencedImport(<NamespaceImport>node.importClause.namedBindings)) {
+                            return true;
+                        }
+                    }
                     // TODO - check namespaceBinding/named Imports if any of them are referenced
                 }
                 else {
@@ -3866,15 +3872,22 @@ module ts {
                     }
                     if (importDeclaration.importClause) {
                         if (importDeclaration.importClause.name) {
-                            // If default, namespace we need to choose which one to use
                             name = importDeclaration.importClause.name;
                         }
+                        else if (importDeclaration.importClause.namedBindings
+                            && importDeclaration.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
+                            name = (<NamespaceImport>importDeclaration.importClause.namedBindings).name;
+                        }
+                        else {
+                            // Use temp variable if we cant use the existing name
+                            name = createTempVariable(importDeclaration);
+                        }
                     }
-
-                    // Use temp variable if we cant use the existing name
-                    if (!name) {
+                    else {
+                        // Use temp variable if we cant use the existing name
                         name = createTempVariable(importDeclaration);
                     }
+
                     importDeclarationNameInfo.push({ importDeclaration, name });
                 }
                 return name;
@@ -3882,14 +3895,14 @@ module ts {
 
             function emitImportDeclaration(node: ImportDeclaration) {
                 if (isReferencedImportDeclaration(node)) {
+                    var importName = getImportDeclarationName(node);
                     // emit var _tmp = require("moduleSpecifier");
                     if (compilerOptions.module === ModuleKind.CommonJS) {
                         writeLine();
                         emitLeadingComments(node);
                         emitStart(node);
-                        var identifier = getImportDeclarationName(node);
                         write("var ");
-                        emit(identifier);
+                        emit(importName);
                         write(" = require(");
                         emitStart(node.moduleSpecifier);
                         emitLiteral(node.moduleSpecifier);
@@ -3898,6 +3911,29 @@ module ts {
                         emitToken(SyntaxKind.SemicolonToken, node.moduleSpecifier.end);
                         emitEnd(node);
                         emitTrailingComments(node);
+                    }
+
+                    if (node.importClause && node.importClause.namedBindings) {
+                        // write assignment to namespace import if the name emitted is coming from default binding
+                        if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
+                            var namespaceImport = <NamespaceImport>node.importClause.namedBindings;
+                            if (node.importClause.name && resolver.isReferencedImport(namespaceImport)) {
+                                Debug.assert(node.importClause.name === importName);
+                                writeLine();
+                                emitLeadingComments(namespaceImport);
+                                emitStart(namespaceImport);
+                                write("var ");
+                                emit(namespaceImport.name);
+                                write(" = ");
+                                emit(importName);
+                                emitEnd(namespaceImport);
+                                write(";");
+                                emitTrailingComments(namespaceImport);
+                            }
+                        }
+                        else {
+                            // Write named imports
+                        }
                     }
                 }
             }

@@ -11,4 +11,6 @@ var x: number = nameSpaceBinding.a;
 //// [es6ImportDefaultBindingFollowedWithNamespaceBindingInEs5_0.js]
 exports.a = 10;
 //// [es6ImportDefaultBindingFollowedWithNamespaceBindingInEs5_1.js]
+var defaultBinding = require("es6ImportDefaultBindingFollowedWithNamespaceBindingInEs5_0");
+var nameSpaceBinding = defaultBinding;
 var x = nameSpaceBinding.a;
