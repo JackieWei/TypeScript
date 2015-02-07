@@ -9364,10 +9364,6 @@ module ts {
                         if (!isInstantiatedModule(<ModuleDeclaration | SourceFile>externalSymbolInfo.externalModuleSymbol.declarations[0], compilerOptions.preserveConstEnums)) {
                             error(node.moduleSpecifier, Diagnostics.Import_declaration_without_import_clause_references_external_module_0_that_is_not_instantiated);
                         }
-                        else {
-                            // Mark the import as referenced so that we emit it in the final .js file.
-                            getSymbolLinks(externalSymbolInfo.externalModuleSymbol).referenced = true;
-                        }
                     }
                 }
             }

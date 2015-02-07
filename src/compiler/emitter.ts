@@ -1508,6 +1508,7 @@ module ts {
             var tempCount = 0;
             var tempVariables: Identifier[];
             var tempParameters: Identifier[];
+            var importDeclarationNameInfo: { importDeclaration: ImportDeclaration; name: Identifier }[]; 
 
             /** write emitted output to disk*/
             var writeEmittedFiles = writeJavaScriptFile;
@@ -3843,17 +3844,36 @@ module ts {
                 }
             }
 
-            function emitImportDeclaration(node: ImportDeclaration) {
+            function isReferencedImportDeclaration(node: ImportDeclaration) {
                 if (node.importClause) {
-                    // TODO
+                    // TODO - check default binding/namespaceBinding/named Imports if any of them are referenced
                 }
                 else {
+                    return true;
+                }
+            }
+
+            function getImportDeclarationName(importDeclaration: ImportDeclaration): Identifier {
+                var name: Identifier = forEach(importDeclarationNameInfo, importDeclarationNameInfo =>
+                    importDeclarationNameInfo.importDeclaration === importDeclaration ? importDeclarationNameInfo.name : undefined);
+                if (!name) {
+                    if (!importDeclarationNameInfo) {
+                        importDeclarationNameInfo = [];
+                    }
+                    name = createTempVariable(importDeclaration);
+                    importDeclarationNameInfo.push({ importDeclaration, name });
+                }
+                return name;
+            }
+
+            function emitImportDeclaration(node: ImportDeclaration) {
+                if (isReferencedImportDeclaration(node)) {
                     // emit var _tmp = require("moduleSpecifier");
                     if (compilerOptions.module === ModuleKind.CommonJS) {
                         writeLine();
                         emitLeadingComments(node);
                         emitStart(node);
-                        var identifier = createTempVariable(node);
+                        var identifier = getImportDeclarationName(node);
                         write("var ");
                         write(identifier.text);
                         write(" = require(");
@@ -3868,11 +3888,14 @@ module ts {
                 }
             }
 
-            function getExternalImportEqualsDeclarations(node: SourceFile): ImportEqualsDeclaration[] {
-                var result: ImportEqualsDeclaration[] = [];
+            function getExternalImportEqualsDeclarationsOrImportDeclarations(node: SourceFile): (ImportEqualsDeclaration | ImportDeclaration)[] {
+                var result: (ImportEqualsDeclaration | ImportDeclaration)[] = [];
                 forEach(node.statements, statement => {
                     if (isExternalModuleImportEqualsDeclaration(statement) && resolver.isReferencedImportEqualsDeclaration(<ImportEqualsDeclaration>statement)) {
                         result.push(<ImportEqualsDeclaration>statement);
+                    }
+                    if (statement.kind === SyntaxKind.ImportDeclaration && isReferencedImportDeclaration(<ImportDeclaration>statement)) {
+                        result.push(<ImportDeclaration>statement);
                     }
                 });
                 return result;
@@ -3887,7 +3910,7 @@ module ts {
             }
 
             function emitAMDModule(node: SourceFile, startIndex: number) {
-                var imports = getExternalImportEqualsDeclarations(node);
+                var imports = getExternalImportEqualsDeclarationsOrImportDeclarations(node);
                 writeLine();
                 write("define(");
                 if (node.amdModuleName) {
@@ -3896,7 +3919,9 @@ module ts {
                 write("[\"require\", \"exports\"");
                 forEach(imports, imp => {
                     write(", ");
-                    emitLiteral(<LiteralExpression>getExternalModuleImportEqualsDeclarationExpression(imp));
+                    emitLiteral(imp.kind === SyntaxKind.ImportDeclaration
+                        ? (<ImportDeclaration>imp).moduleSpecifier
+                        : <LiteralExpression>getExternalModuleImportEqualsDeclarationExpression(imp));
                 });
                 forEach(node.amdDependencies, amdDependency => {
                     var text = "\"" + amdDependency + "\"";
@@ -3906,7 +3931,13 @@ module ts {
                 write("], function (require, exports");
                 forEach(imports, imp => {
                     write(", ");
-                    emit(imp.name);
+                    if (imp.kind === SyntaxKind.ImportDeclaration) {
+                        var name = getImportDeclarationName(<ImportDeclaration>imp);
+                        write(name.text);
+                    }
+                    else {
+                        emit(imp.name);
+                    }
                 });
                 write(") {");
                 increaseIndent();
