@@ -10,3 +10,4 @@ import "es6ImportWithoutFromClauseNonInstantiatedModule_0";
 
 //// [es6ImportWithoutFromClauseNonInstantiatedModule_0.js]
 //// [es6ImportWithoutFromClauseNonInstantiatedModule_1.js]
+var _a = require("es6ImportWithoutFromClauseNonInstantiatedModule_0");

@@ -3,6 +3,11 @@
 export var a = 10;
 >a : number
 
+=== tests/cases/compiler/es6ImportWithoutFromClause_2.ts ===
+export var b = 10;
+>b : number
+
 === tests/cases/compiler/es6ImportWithoutFromClause_1.ts ===
-import "es6ImportWithoutFromClause_0";
+import "es6ImportWithoutFromClause_0"; 
+No type information for this code.import "es6ImportWithoutFromClause_2";
 No type information for this code.

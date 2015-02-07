@@ -2249,6 +2249,9 @@ module ts {
                     case SyntaxKind.EnumDeclaration:
                     case SyntaxKind.ModuleDeclaration:
                     case SyntaxKind.ImportEqualsDeclaration:
+                    case SyntaxKind.ImportClause:
+                    case SyntaxKind.ImportSpecifier:
+                    case SyntaxKind.NamespaceImport:
                         return (<Declaration>parent).name === node;
                     case SyntaxKind.BreakStatement:
                     case SyntaxKind.ContinueStatement:
@@ -3840,6 +3843,31 @@ module ts {
                 }
             }
 
+            function emitImportDeclaration(node: ImportDeclaration) {
+                if (node.importClause) {
+                    // TODO
+                }
+                else {
+                    // emit var _tmp = require("moduleSpecifier");
+                    if (compilerOptions.module === ModuleKind.CommonJS) {
+                        writeLine();
+                        emitLeadingComments(node);
+                        emitStart(node);
+                        var identifier = createTempVariable(node);
+                        write("var ");
+                        write(identifier.text);
+                        write(" = require(");
+                        emitStart(node.moduleSpecifier);
+                        emitLiteral(node.moduleSpecifier);
+                        emitEnd(node.moduleSpecifier);
+                        write(")");
+                        emitToken(SyntaxKind.SemicolonToken, node.moduleSpecifier.end);
+                        emitEnd(node);
+                        emitTrailingComments(node);
+                    }
+                }
+            }
+
             function getExternalImportEqualsDeclarations(node: SourceFile): ImportEqualsDeclaration[] {
                 var result: ImportEqualsDeclaration[] = [];
                 forEach(node.statements, statement => {
@@ -4127,6 +4155,8 @@ module ts {
                         return emitModuleDeclaration(<ModuleDeclaration>node);
                     case SyntaxKind.ImportEqualsDeclaration:
                         return emitImportEqualsDeclaration(<ImportEqualsDeclaration>node);
+                    case SyntaxKind.ImportDeclaration:
+                        return emitImportDeclaration(<ImportDeclaration>node);
                     case SyntaxKind.SourceFile:
                         return emitSourceFile(<SourceFile>node);
                 }
