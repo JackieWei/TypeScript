@@ -2266,12 +2266,22 @@ module ts {
             }
 
             function emitExpressionIdentifier(node: Identifier) {
-                var prefix = resolver.getExpressionNamePrefix(node);
-                if (prefix) {
-                    write(prefix);
+                var importSpecifier = resolver.getExpressionImportSpecifier(node);
+                if (importSpecifier) {
+                    var importDeclaration = <ImportDeclaration>importSpecifier.parent.parent.parent;
+                    var importName = getImportDeclarationName(importDeclaration);
+                    emit(importName);
                     write(".");
+                    emit(importSpecifier.propertyName || importSpecifier.name);
                 }
-                writeTextOfNode(currentSourceFile, node);
+                else {
+                    var prefix = resolver.getExpressionNamePrefix(node);
+                    if (prefix) {
+                        write(prefix);
+                        write(".");
+                    }
+                    writeTextOfNode(currentSourceFile, node);
+                }
             }
 
             function emitIdentifier(node: Identifier) {
@@ -3850,13 +3860,18 @@ module ts {
                     if (node.importClause.name && resolver.isReferencedImport(node.importClause)) {
                         return true;
                     }
+
                     if (node.importClause.namedBindings) {
-                        if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport
-                            && resolver.isReferencedImport(<NamespaceImport>node.importClause.namedBindings)) {
-                            return true;
+                        if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
+                            return resolver.isReferencedImport(<NamespaceImport>node.importClause.namedBindings);
+                        }
+                        else {
+                            // Emit if there is empty named import list or if there are named Imports being referenced
+                            var namedImports = <NamedImports>node.importClause.namedBindings;
+                            return !namedImports.elements.length
+                                || forEach(namedImports.elements, namedImport => resolver.isReferencedImport(namedImport));
                         }
                     }
-                    // TODO - check namespaceBinding/named Imports if any of them are referenced
                 }
                 else {
                     return true;
@@ -3930,9 +3945,6 @@ module ts {
                                 write(";");
                                 emitTrailingComments(namespaceImport);
                             }
-                        }
-                        else {
-                            // Write named imports
                         }
                     }
                 }

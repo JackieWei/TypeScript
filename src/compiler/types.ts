@@ -1166,6 +1166,7 @@ module ts {
         // Returns the constant value this property access resolves to, or 'undefined' for a non-constant
         getConstantValue(node: PropertyAccessExpression | ElementAccessExpression): number;
         isUnknownIdentifier(location: Node, name: string): boolean;
+        getExpressionImportSpecifier(node: Identifier): ImportSpecifier;
     }
 
     export const enum SymbolFlags {

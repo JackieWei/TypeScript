@@ -10191,6 +10191,13 @@ module ts {
             }
         }
 
+        function getExpressionImportSpecifier(node: Identifier): ImportSpecifier {
+            var symbol = getNodeLinks(node).resolvedSymbol;
+            if (symbol && !!(symbol.flags & SymbolFlags.Import)) {
+                return <ImportSpecifier>getDeclarationOfKind(symbol, SyntaxKind.ImportSpecifier);
+            }
+        }
+
         function getExportAssignmentName(node: SourceFile): string {
             var symbol = getExportAssignmentSymbol(getSymbolOfNode(node));
             return symbol && symbolIsValue(symbol) && !isConstEnumSymbol(symbol) ? symbolToString(symbol): undefined;
@@ -10312,6 +10319,7 @@ module ts {
                 isEntityNameVisible,
                 getConstantValue,
                 isUnknownIdentifier,
+                getExpressionImportSpecifier,
             };
         }
 
