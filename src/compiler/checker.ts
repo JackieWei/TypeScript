@@ -4882,7 +4882,7 @@ module ts {
 
         /*Transitively mark all linked imports as referenced*/
         function markLinkedImportsAsReferenced(node: ImportEqualsDeclaration): void {
-            // TODO(shkamat): For now this could be true for ImportDeclaration bound symbol
+            // node could be undefined if the import symbol was declared using ImportDeclaration instead of ImportEqualsDeclaration
             if (!node) {
                 return;
             }
@@ -4894,7 +4894,14 @@ module ts {
                 getSymbolLinks(rightSide).referenced = true;
                 Debug.assert((rightSide.flags & SymbolFlags.Import) !== 0);
 
-                nodeLinks = getNodeLinks(getDeclarationOfKind(rightSide, SyntaxKind.ImportEqualsDeclaration))
+
+                var importDeclaration = getDeclarationOfKind(rightSide, SyntaxKind.ImportEqualsDeclaration);
+                if (importDeclaration) {
+                    nodeLinks = getNodeLinks(getDeclarationOfKind(rightSide, SyntaxKind.ImportEqualsDeclaration))
+                }
+                else {
+                    break;
+                }
             }
         }
 
