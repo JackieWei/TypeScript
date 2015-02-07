@@ -20,5 +20,6 @@ import defaultBinding3 from "es6ImportDefaultBindingMergeErrors_0"; // SHould be
 var a = 10;
 module.exports = a;
 //// [es6ImportDefaultBindingMergeErrors_1.js]
+var defaultBinding = require("es6ImportDefaultBindingMergeErrors_0");
 var x = defaultBinding;
 var defaultBinding2 = "hello world";

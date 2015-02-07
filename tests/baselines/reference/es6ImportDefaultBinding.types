@@ -14,3 +14,6 @@ var x = defaultBinding;
 >x : number
 >defaultBinding : number
 
+import defaultBinding2 from "es6ImportDefaultBinding_0"; // elide this import since defaultBinding2 is not used
+>defaultBinding2 : number
+

@@ -10140,7 +10140,7 @@ module ts {
                     // Make sure the name in question does not collide with an import.
                     if (symbolWithRelevantName.flags & SymbolFlags.Import) {
                         var importEqualsDeclarationWithRelevantName = <ImportEqualsDeclaration>getDeclarationOfKind(symbolWithRelevantName, SyntaxKind.ImportEqualsDeclaration);
-                        if (isReferencedImportEqualsDeclaration(importEqualsDeclarationWithRelevantName)) {
+                        if (isReferencedImport(importEqualsDeclarationWithRelevantName)) {
                             return false;
                         }
                     }
@@ -10219,7 +10219,7 @@ module ts {
             return isConstEnumSymbol(s) || s.constEnumOnlyModule;
         }
 
-        function isReferencedImportEqualsDeclaration(node: ImportEqualsDeclaration): boolean {
+        function isReferencedImport(node: ImportEqualsDeclaration | ImportClause | NamespaceImport | ImportSpecifier): boolean {
             var symbol = getSymbolOfNode(node);
             if (getSymbolLinks(symbol).referenced) {
                 return true;
@@ -10299,7 +10299,7 @@ module ts {
                 getLocalNameOfContainer,
                 getExpressionNamePrefix,
                 getExportAssignmentName,
-                isReferencedImportEqualsDeclaration,
+                isReferencedImport,
                 getNodeCheckFlags,
                 getEnumMemberValue,
                 isTopLevelValueImportEqualsWithEntityName,

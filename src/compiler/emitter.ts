@@ -3796,7 +3796,7 @@ module ts {
             }
 
             function emitImportEqualsDeclaration(node: ImportEqualsDeclaration) {
-                var emitImportDeclaration = resolver.isReferencedImportEqualsDeclaration(node);
+                var emitImportDeclaration = resolver.isReferencedImport(node);
 
                 if (!emitImportDeclaration) {
                     // preserve old compiler's behavior: emit 'var' for import declaration (even if we do not consider them referenced) when
@@ -3846,7 +3846,11 @@ module ts {
 
             function isReferencedImportDeclaration(node: ImportDeclaration) {
                 if (node.importClause) {
-                    // TODO - check default binding/namespaceBinding/named Imports if any of them are referenced
+                    // Default binding
+                    if (node.importClause.name && resolver.isReferencedImport(node.importClause)) {
+                        return true;
+                    }
+                    // TODO - check namespaceBinding/named Imports if any of them are referenced
                 }
                 else {
                     return true;
@@ -3860,7 +3864,17 @@ module ts {
                     if (!importDeclarationNameInfo) {
                         importDeclarationNameInfo = [];
                     }
-                    name = createTempVariable(importDeclaration);
+                    if (importDeclaration.importClause) {
+                        if (importDeclaration.importClause.name) {
+                            // If default, namespace we need to choose which one to use
+                            name = importDeclaration.importClause.name;
+                        }
+                    }
+
+                    // Use temp variable if we cant use the existing name
+                    if (!name) {
+                        name = createTempVariable(importDeclaration);
+                    }
                     importDeclarationNameInfo.push({ importDeclaration, name });
                 }
                 return name;
@@ -3875,7 +3889,7 @@ module ts {
                         emitStart(node);
                         var identifier = getImportDeclarationName(node);
                         write("var ");
-                        write(identifier.text);
+                        emit(identifier);
                         write(" = require(");
                         emitStart(node.moduleSpecifier);
                         emitLiteral(node.moduleSpecifier);
@@ -3891,7 +3905,7 @@ module ts {
             function getExternalImportEqualsDeclarationsOrImportDeclarations(node: SourceFile): (ImportEqualsDeclaration | ImportDeclaration)[] {
                 var result: (ImportEqualsDeclaration | ImportDeclaration)[] = [];
                 forEach(node.statements, statement => {
-                    if (isExternalModuleImportEqualsDeclaration(statement) && resolver.isReferencedImportEqualsDeclaration(<ImportEqualsDeclaration>statement)) {
+                    if (isExternalModuleImportEqualsDeclaration(statement) && resolver.isReferencedImport(<ImportEqualsDeclaration>statement)) {
                         result.push(<ImportEqualsDeclaration>statement);
                     }
                     if (statement.kind === SyntaxKind.ImportDeclaration && isReferencedImportDeclaration(<ImportDeclaration>statement)) {
@@ -3933,7 +3947,7 @@ module ts {
                     write(", ");
                     if (imp.kind === SyntaxKind.ImportDeclaration) {
                         var name = getImportDeclarationName(<ImportDeclaration>imp);
-                        write(name.text);
+                        emit(name);
                     }
                     else {
                         emit(imp.name);

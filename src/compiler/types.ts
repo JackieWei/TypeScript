@@ -1152,7 +1152,7 @@ module ts {
         getLocalNameOfContainer(container: ModuleDeclaration | EnumDeclaration): string;
         getExpressionNamePrefix(node: Identifier): string;
         getExportAssignmentName(node: SourceFile): string;
-        isReferencedImportEqualsDeclaration(node: ImportEqualsDeclaration): boolean;
+        isReferencedImport(node: ImportEqualsDeclaration | ImportClause | NamespaceImport | ImportSpecifier): boolean;
         isTopLevelValueImportEqualsWithEntityName(node: ImportEqualsDeclaration): boolean;
         getNodeCheckFlags(node: Node): NodeCheckFlags;
         getEnumMemberValue(node: EnumMember): number;
