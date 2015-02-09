@@ -1,5 +1,6 @@
 // @target: es5
 // @module: commonjs
+// @declaration: true
 
 // @filename: es6ImportNameSpaceImportInEs5_0.ts
 export var a = 10;  

@@ -18,3 +18,10 @@ define(["require", "exports"], function (require, exports) {
 define(["require", "exports", "es6ImportNameSpaceImportAmd_0"], function (require, exports, nameSpaceBinding) {
     var x = nameSpaceBinding.a;
 });
+
+
+//// [es6ImportNameSpaceImportAmd_0.d.ts]
+export declare var a: number;
+//// [es6ImportNameSpaceImportAmd_1.d.ts]
+import * as nameSpaceBinding from "es6ImportNameSpaceImportAmd_0";
+import * as nameSpaceBinding2 from "es6ImportNameSpaceImportAmd_0";
