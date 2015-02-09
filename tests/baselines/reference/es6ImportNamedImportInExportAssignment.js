@@ -13,3 +13,10 @@ exports.a = 10;
 //// [es6ImportNamedImportInExportAssignment_1.js]
 var _a = require("es6ImportNamedImportInExportAssignment_0");
 module.exports = a;
+
+
+//// [es6ImportNamedImportInExportAssignment_0.d.ts]
+export declare var a: number;
+//// [es6ImportNamedImportInExportAssignment_1.d.ts]
+import { a } from "es6ImportNamedImportInExportAssignment_0";
+export = a;
