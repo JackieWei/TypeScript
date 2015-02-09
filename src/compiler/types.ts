@@ -877,6 +877,8 @@ module ts {
         moduleSpecifier: StringLiteralExpression;
     }
 
+    export type AnyImportSyntax = ImportEqualsDeclaration | ImportDeclaration;
+
     // In case of: 
     // import d from "mod" => name = d, namedBinding = undefined
     // import * as ns from "mod" => name = undefined, namedBinding: NamespaceImport = { name: ns }

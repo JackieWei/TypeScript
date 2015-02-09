@@ -10240,7 +10240,10 @@ module ts {
             }
             // logic below will answer 'true' for exported import declaration in a nested module that itself is not exported.
             // As a consequence this might cause emitting extra.
-            if (node.flags & NodeFlags.Export) {
+            var anyImportDeclaration = node.kind === SyntaxKind.ImportEqualsDeclaration
+                ? <ImportEqualsDeclaration>node
+                : getImportDeclarationFromAncestorChain(node);
+            if (anyImportDeclaration.flags & NodeFlags.Export) {
                 return isImportResolvedToValue(symbol);
             }
             return false;

@@ -4543,7 +4543,7 @@ module ts {
                 token === SyntaxKind.FromKeyword;
         }
 
-        function parseImportDeclarationOrImportEqualsDeclaration(fullStart: number, modifiers: ModifiersArray): ImportEqualsDeclaration | ImportDeclaration {
+        function parseImportDeclarationOrImportEqualsDeclaration(fullStart: number, modifiers: ModifiersArray): AnyImportSyntax {
             parseExpected(SyntaxKind.ImportKeyword);
             var identifier: Identifier;
             if (isIdentifier()) {

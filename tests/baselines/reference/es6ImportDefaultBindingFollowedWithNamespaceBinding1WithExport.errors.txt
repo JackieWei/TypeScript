@@ -1,0 +1,13 @@
+tests/cases/compiler/client.ts(1,31): error TS2468: External module 'server' does not contain any named exports.
+
+
+==== tests/cases/compiler/server.ts (0 errors) ====
+    
+    var a = 10;
+    export = a;
+    
+==== tests/cases/compiler/client.ts (1 errors) ====
+    export import defaultBinding, * as nameSpaceBinding  from "server";
+                                  ~~~~~~~~~~~~~~~~~~~~~
+!!! error TS2468: External module 'server' does not contain any named exports.
+    export var x: number = defaultBinding;

@@ -599,6 +599,14 @@ module ts {
         return node.kind == SyntaxKind.ImportEqualsDeclaration || node.kind === SyntaxKind.ImportDeclaration;
     }
 
+    export function getImportDeclarationFromAncestorChain(declaration: Declaration): ImportDeclaration {
+        var node: Node = declaration;
+        while (node && node.kind !== SyntaxKind.ImportDeclaration) {
+            node = node.parent;
+        }
+        return <ImportDeclaration>node;
+    }
+
     export function hasQuestionToken(node: Node) {
         if (node) {
             switch (node.kind) {

@@ -2270,9 +2270,7 @@ module ts {
                 if (importSpecifier) {
                     var importDeclaration = <ImportDeclaration>importSpecifier.parent.parent.parent;
                     var importName = getImportDeclarationName(importDeclaration);
-                    emit(importName);
-                    write(".");
-                    emit(importSpecifier.propertyName || importSpecifier.name);
+                    emitReferenceToImportSpecifier(importSpecifier, importName);
                 }
                 else {
                     var prefix = resolver.getExpressionNamePrefix(node);
@@ -2282,6 +2280,12 @@ module ts {
                     }
                     writeTextOfNode(currentSourceFile, node);
                 }
+            }
+
+            function emitReferenceToImportSpecifier(importSpecifier: ImportSpecifier, importName: Identifier) {
+                emit(importName);
+                write(".");
+                emit(importSpecifier.propertyName || importSpecifier.name);
             }
 
             function emitIdentifier(node: Identifier) {
@@ -3928,30 +3932,69 @@ module ts {
                         emitTrailingComments(node);
                     }
 
-                    if (node.importClause && node.importClause.namedBindings) {
-                        // write assignment to namespace import if the name emitted is coming from default binding
-                        if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
-                            var namespaceImport = <NamespaceImport>node.importClause.namedBindings;
-                            if (node.importClause.name && resolver.isReferencedImport(namespaceImport)) {
-                                Debug.assert(node.importClause.name === importName);
-                                writeLine();
-                                emitLeadingComments(namespaceImport);
-                                emitStart(namespaceImport);
-                                write("var ");
-                                emit(namespaceImport.name);
-                                write(" = ");
-                                emit(importName);
-                                emitEnd(namespaceImport);
-                                write(";");
-                                emitTrailingComments(namespaceImport);
+                    if (node.importClause) {
+                        var isExported = !!(node.flags & NodeFlags.Export);
+                        if (isExported && node.importClause.name && resolver.isReferencedImport(node.importClause)) {
+                            writeLine();
+                            emitStart(node.importClause.name);
+                            write("exports.");
+                            emit(node.importClause.name);
+                            write(" = ");
+                            emit(node.importClause.name);
+                            emitEnd(node.importClause.name);
+                            write(";");
+                        }
+                        if (node.importClause.namedBindings) {
+                            // write assignment to namespace import if the name emitted is coming from default binding
+                            if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
+                                var namespaceImport = <NamespaceImport>node.importClause.namedBindings;
+                                var isReferencedNamespaceImport = resolver.isReferencedImport(namespaceImport);
+                                if (node.importClause.name && isReferencedNamespaceImport) {
+                                    Debug.assert(node.importClause.name === importName);
+                                    writeLine();
+                                    emitLeadingComments(namespaceImport);
+                                    emitStart(namespaceImport);
+                                    write("var ");
+                                    emit(namespaceImport.name);
+                                    write(" = ");
+                                    emit(importName);
+                                    emitEnd(namespaceImport);
+                                    write(";");
+                                    emitTrailingComments(namespaceImport);
+                                }
+                                if (isExported && isReferencedNamespaceImport) {
+                                    writeLine();
+                                    emitStart(namespaceImport);
+                                    write("exports.");
+                                    emit(namespaceImport.name);
+                                    write(" = ");
+                                    emit(namespaceImport.name);
+                                    emitEnd(namespaceImport);
+                                    write(";");
+                                }
+                            }
+                            else if (isExported) {
+                                var namedImports = (<NamedImports>node.importClause.namedBindings).elements;
+                                forEach(namedImports, importSpecifier => {
+                                    if (resolver.isReferencedImport(importSpecifier)) {
+                                        writeLine();
+                                        emitStart(importSpecifier);
+                                        write("exports.");
+                                        emit(importSpecifier.name);
+                                        write(" = ");
+                                        emitReferenceToImportSpecifier(importSpecifier, importName);
+                                        emitEnd(importSpecifier);
+                                        write(";");
+                                    }
+                                });
                             }
                         }
                     }
                 }
             }
 
-            function getExternalImportEqualsDeclarationsOrImportDeclarations(node: SourceFile): (ImportEqualsDeclaration | ImportDeclaration)[] {
-                var result: (ImportEqualsDeclaration | ImportDeclaration)[] = [];
+            function getExternalImportEqualsDeclarationsOrImportDeclarations(node: SourceFile): AnyImportSyntax[] {
+                var result: AnyImportSyntax[] = [];
                 forEach(node.statements, statement => {
                     if (isExternalModuleImportEqualsDeclaration(statement) && resolver.isReferencedImport(<ImportEqualsDeclaration>statement)) {
                         result.push(<ImportEqualsDeclaration>statement);
