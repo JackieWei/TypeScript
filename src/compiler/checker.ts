@@ -509,12 +509,7 @@ module ts {
 
         }
         function getSymbolInfoForModuleSpecifierOfImportDeclaration(declaration: Declaration) {
-            var node: Node = declaration;
-            while (node.kind !== SyntaxKind.ImportDeclaration) {
-                node = node.parent;
-            }
-
-            var moduleSpecifier = (<ImportDeclaration>node).moduleSpecifier;
+            var moduleSpecifier = getImportDeclarationFromAncestorChain(declaration).moduleSpecifier;
             if (moduleSpecifier) {
                 var externalModuleSymbol = resolveExternalModuleName(declaration, moduleSpecifier);
                 if (externalModuleSymbol) {
@@ -995,7 +990,7 @@ module ts {
         }
 
         function hasVisibleDeclarations(symbol: Symbol): SymbolVisibilityResult {
-            var aliasesToMakeVisible: ImportEqualsDeclaration[];
+            var aliasesToMakeVisible: AnyImportSyntax[];
             if (forEach(symbol.declarations, declaration => !getIsDeclarationVisible(declaration))) {
                 return undefined;
             }
@@ -1003,19 +998,24 @@ module ts {
 
             function getIsDeclarationVisible(declaration: Declaration) {
                 if (!isDeclarationVisible(declaration)) {
-                    // Mark the unexported alias as visible if its parent is visible 
+                    // Mark the non exported alias as visible if its parent is visible 
                     // because these kind of aliases can be used to name types in declaration file
-                    if (declaration.kind === SyntaxKind.ImportEqualsDeclaration &&
-                        !(declaration.flags & NodeFlags.Export) &&
-                        isDeclarationVisible(<Declaration>declaration.parent)) {
+
+                    var importDeclaratonOrImportEqualsDeclaraton = declaration.kind === SyntaxKind.ImportEqualsDeclaration
+                        ? <ImportEqualsDeclaration>declaration
+                        : getImportDeclarationFromAncestorChain(declaration);
+
+                    if (importDeclaratonOrImportEqualsDeclaraton &&
+                        !(importDeclaratonOrImportEqualsDeclaraton.flags & NodeFlags.Export) && // import clauses without export
+                        isDeclarationVisible(<Declaration>importDeclaratonOrImportEqualsDeclaraton.parent)) {
                         getNodeLinks(declaration).isVisible = true;
                         if (aliasesToMakeVisible) {
-                            if (!contains(aliasesToMakeVisible, declaration)) {
-                                aliasesToMakeVisible.push(<ImportEqualsDeclaration>declaration);
+                            if (!contains(aliasesToMakeVisible, importDeclaratonOrImportEqualsDeclaraton)) {
+                                aliasesToMakeVisible.push(<AnyImportSyntax>importDeclaratonOrImportEqualsDeclaraton);
                             }
                         }
                         else {
-                            aliasesToMakeVisible = [<ImportEqualsDeclaration>declaration];
+                            aliasesToMakeVisible = [<AnyImportSyntax>importDeclaratonOrImportEqualsDeclaraton];
                         }
                         return true;
                     }
@@ -1682,6 +1682,16 @@ module ts {
                     case SyntaxKind.ParenthesizedType:
                         return isDeclarationVisible(<Declaration>node.parent);
                     
+                    // Import Declaration is visible only if it is exported
+                    case SyntaxKind.ImportDeclaration:
+                        return !!(node.flags & NodeFlags.Export);
+
+                    // Default binding, import specifier and namespace import is visible only if the import declaration is exported or it is used in export assignment
+                    case SyntaxKind.ImportClause:
+                    case SyntaxKind.NamespaceImport:
+                    case SyntaxKind.ImportSpecifier:
+                        return !!(getImportDeclarationFromAncestorChain(node).flags & NodeFlags.Export) || (node.name && isUsedInExportAssignment(node));
+
                     // Type parameters are always visible
                     case SyntaxKind.TypeParameter:
                     // Source file is always visible
