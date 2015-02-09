@@ -26,3 +26,12 @@ define(["require", "exports", "es6ImportWithoutFromClauseAmd_0", "es6ImportWitho
     var _a = 10;
     var _b = 10;
 });
+
+
+//// [es6ImportWithoutFromClauseAmd_0.d.ts]
+export declare var a: number;
+//// [es6ImportWithoutFromClauseAmd_1.d.ts]
+export declare var b: number;
+//// [es6ImportWithoutFromClauseAmd_2.d.ts]
+import "es6ImportWithoutFromClauseAmd_0";
+import "es6ImportWithoutFromClauseAmd_2";
