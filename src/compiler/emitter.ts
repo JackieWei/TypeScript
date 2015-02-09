@@ -715,7 +715,14 @@ module ts {
                     return resolver.isDeclarationVisible(<NamespaceImport>namedBindings);
                 }
                 else {
-                    return forEach((<NamedImports>namedBindings).elements, namedImport => resolver.isDeclarationVisible(namedImport));
+                    var namedImports = (<NamedImports>namedBindings).elements;
+                    if (namedImports.length) {
+                        return forEach(namedImports, namedImport => resolver.isDeclarationVisible(namedImport));
+                    }
+                    else {
+                        // if this is empty list the named bindings are visible if it is exported
+                        return !!(namedBindings.parent.parent.flags & NodeFlags.Export);
+                    }
                 }
             }
         }
@@ -738,12 +745,16 @@ module ts {
                     }
                     if (node.importClause.namedBindings.kind === SyntaxKind.NamespaceImport) {
                         write("* as ");
-                        writeTextOfNode(currentSourceFile, (<NamespaceImport>node.importClause.namedBindings).name);
+                        writeTextOfNode(currentSourceFile,(<NamespaceImport>node.importClause.namedBindings).name);
                     }
                     else {
+                        var namedImports = (<NamedImports>node.importClause.namedBindings).elements;
                         write("{ ");
                         emitCommaList((<NamedImports>node.importClause.namedBindings).elements, emitImportSpecifier, resolver.isDeclarationVisible);
-                        write(" }");
+                        if (namedImports.length) {
+                            write(" ");
+                        }
+                        write("}");
                     }
                 }
                 write(" from ");

@@ -1,4 +1,5 @@
 // @module: commonjs
+// @declaration: true
 
 // @filename: server.ts
 var a = 10;

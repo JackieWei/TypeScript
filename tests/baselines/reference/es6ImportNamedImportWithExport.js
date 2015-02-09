@@ -89,3 +89,39 @@ var _l = require("server");
 exports.aaaa = _l.aaaa;
 var _m = require("server");
 exports.bbbb = _m.aaaa;
+
+
+//// [server.d.ts]
+export declare var a: number;
+export declare var x: number;
+export declare var m: number;
+export declare var a1: number;
+export declare var x1: number;
+export declare var z1: number;
+export declare var z2: number;
+export declare var aaaa: number;
+//// [client.d.ts]
+export import { } from "server";
+export import { a } from "server";
+export declare var xxxx: number;
+export import { a as b } from "server";
+export declare var xxxx: number;
+export import { x, a as y } from "server";
+export declare var xxxx: number;
+export declare var xxxx: number;
+export import { x as z } from "server";
+export declare var xxxx: number;
+export import { m } from "server";
+export declare var xxxx: number;
+export import { a1, x1 } from "server";
+export declare var xxxx: number;
+export declare var xxxx: number;
+export import { a1 as a11, x1 as x11 } from "server";
+export declare var xxxx: number;
+export declare var xxxx: number;
+export import { z1 } from "server";
+export declare var z111: number;
+export import { z2 as z3 } from "server";
+export declare var z2: number;
+export import { aaaa } from "server";
+export import { aaaa as bbbb } from "server";

@@ -11,3 +11,9 @@ export import "server";
 exports.a = 10;
 //// [client.js]
 var _a = require("server");
+
+
+//// [server.d.ts]
+export declare var a: number;
+//// [client.d.ts]
+export import "server";

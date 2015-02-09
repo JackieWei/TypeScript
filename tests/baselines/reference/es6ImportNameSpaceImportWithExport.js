@@ -20,3 +20,11 @@ define(["require", "exports", "server", "server"], function (require, exports, n
     exports.x = nameSpaceBinding.a;
     exports.nameSpaceBinding2 = nameSpaceBinding2;
 });
+
+
+//// [server.d.ts]
+export declare var a: number;
+//// [client.d.ts]
+export import * as nameSpaceBinding from "server";
+export declare var x: number;
+export import * as nameSpaceBinding2 from "server";

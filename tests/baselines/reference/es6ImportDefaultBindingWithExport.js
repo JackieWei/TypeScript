@@ -21,3 +21,12 @@ define(["require", "exports", "server", "server"], function (require, exports, d
     exports.x = defaultBinding;
     exports.defaultBinding2 = defaultBinding2;
 });
+
+
+//// [server.d.ts]
+declare var a: number;
+export = a;
+//// [client.d.ts]
+export import defaultBinding from "server";
+export declare var x: number;
+export import defaultBinding2 from "server";

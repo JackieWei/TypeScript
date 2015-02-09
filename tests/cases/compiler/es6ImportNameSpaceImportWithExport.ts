@@ -1,4 +1,5 @@
 // @module: amd
+// @declaration: true
 
 // @filename: server.ts
 export var a = 10;
