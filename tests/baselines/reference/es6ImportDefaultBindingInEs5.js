@@ -12,3 +12,10 @@ import defaultBinding from "es6ImportDefaultBindingInEs5_0";
 var a = 10;
 module.exports = a;
 //// [es6ImportDefaultBindingInEs5_1.js]
+
+
+//// [es6ImportDefaultBindingInEs5_0.d.ts]
+declare var a: number;
+export = a;
+//// [es6ImportDefaultBindingInEs5_1.d.ts]
+import defaultBinding from "es6ImportDefaultBindingInEs5_0";

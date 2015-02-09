@@ -1,5 +1,6 @@
 // @target: es5
 // @module: commonjs
+// @declaration: true
 
 // @filename: es6ImportDefaultBindingInEs5_0.ts
 var a = 10;

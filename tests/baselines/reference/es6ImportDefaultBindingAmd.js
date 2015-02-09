@@ -20,3 +20,11 @@ define(["require", "exports"], function (require, exports) {
 define(["require", "exports", "es6ImportDefaultBindingAmd_0"], function (require, exports, defaultBinding) {
     var x = defaultBinding;
 });
+
+
+//// [es6ImportDefaultBindingAmd_0.d.ts]
+declare var a: number;
+export = a;
+//// [es6ImportDefaultBindingAmd_1.d.ts]
+import defaultBinding from "es6ImportDefaultBindingAmd_0";
+import defaultBinding2 from "es6ImportDefaultBindingAmd_0";

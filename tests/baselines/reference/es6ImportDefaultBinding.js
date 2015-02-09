@@ -17,3 +17,11 @@ module.exports = a;
 //// [es6ImportDefaultBinding_1.js]
 var defaultBinding = require("es6ImportDefaultBinding_0");
 var x = defaultBinding;
+
+
+//// [es6ImportDefaultBinding_0.d.ts]
+declare var a: number;
+export = a;
+//// [es6ImportDefaultBinding_1.d.ts]
+import defaultBinding from "es6ImportDefaultBinding_0";
+import defaultBinding2 from "es6ImportDefaultBinding_0";
