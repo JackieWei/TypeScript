@@ -67,3 +67,27 @@ define(["require", "exports", "es6ImportNamedImportAmd_0", "es6ImportNamedImport
     var z111 = _j.z1;
     var z2 = _k.z2; // z2 shouldn't give redeclare error
 });
+
+
+//// [es6ImportNamedImportAmd_0.d.ts]
+export declare var a: number;
+export declare var x: number;
+export declare var m: number;
+export declare var a1: number;
+export declare var x1: number;
+export declare var z1: number;
+export declare var z2: number;
+export declare var aaaa: number;
+//// [es6ImportNamedImportAmd_1.d.ts]
+import { } from "es6ImportNamedImportAmd_0";
+import { a } from "es6ImportNamedImportAmd_0";
+import { a as b } from "es6ImportNamedImportAmd_0";
+import { x,  a as y } from "es6ImportNamedImportAmd_0";
+import { x as z } from "es6ImportNamedImportAmd_0";
+import { m } from "es6ImportNamedImportAmd_0";
+import { a1,  x1 } from "es6ImportNamedImportAmd_0";
+import { a1 as a11,  x1 as x11 } from "es6ImportNamedImportAmd_0";
+import { z1 } from "es6ImportNamedImportAmd_0";
+import { z2 as z3 } from "es6ImportNamedImportAmd_0";
+import { aaaa } from "es6ImportNamedImportAmd_0";
+import { aaaa as bbbb } from "es6ImportNamedImportAmd_0";

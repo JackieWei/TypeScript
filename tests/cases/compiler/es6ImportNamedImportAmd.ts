@@ -1,4 +1,5 @@
 // @module: amd
+// @declaration: true
 
 // @filename: es6ImportNamedImportAmd_0.ts
 export var a = 10;
